@@ -1,14 +1,13 @@
 from collections import namedtuple
-
 import torch
-import torch.nn as nn
 from torchvision import models
+from torch import nn
 
+class Vgg13(nn.Module):
 
-class Vgg19(nn.Module):
     def __init__(self, requires_grad=False, show_progress=False, use_relu=True):
         super().__init__()
-        vgg_pretrained_features = models.vgg19(pretrained=True, progress=show_progress).features
+        vgg_pretrained_features = models.vgg13(pretrained=True, progress=show_progress).features
         if use_relu:  # use relu or as in original paper conv layers
             self.layer_names = ['relu1_1', 'relu2_1', 'relu3_1', 'relu4_1', 'conv4_2', 'relu5_1']
             self.offset = 1
@@ -38,8 +37,9 @@ class Vgg19(nn.Module):
             self.slice4.add_module(str(x), vgg_pretrained_features[x])
         for x in range(20+self.offset, 22):
             self.slice5.add_module(str(x), vgg_pretrained_features[x])
-        for x in range(22, 29++self.offset):
+        for x in range(22, 29+self.offset):
             self.slice6.add_module(str(x), vgg_pretrained_features[x])
+
         if not requires_grad:
             for param in self.parameters():
                 param.requires_grad = False

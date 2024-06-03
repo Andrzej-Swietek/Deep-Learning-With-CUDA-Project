@@ -1,21 +1,23 @@
-from collections import namedtuple
-
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
+from collections import namedtuple
+import torch
 from torchvision import models
+from torch import nn
 
+class Vgg11(nn.Module):
+    """Custom VGG11 for Neural Style Transfer."""
 
-class Vgg19(nn.Module):
     def __init__(self, requires_grad=False, show_progress=False, use_relu=True):
         super().__init__()
-        vgg_pretrained_features = models.vgg19(pretrained=True, progress=show_progress).features
+        vgg_pretrained_features = models.vgg11(pretrained=True, progress=show_progress).features
         if use_relu:  # use relu or as in original paper conv layers
             self.layer_names = ['relu1_1', 'relu2_1', 'relu3_1', 'relu4_1', 'conv4_2', 'relu5_1']
             self.offset = 1
         else:
             self.layer_names = ['conv1_1', 'conv2_1', 'conv3_1', 'conv4_1', 'conv4_2', 'conv5_1']
             self.offset = 0
-
         self.content_feature_maps_index = 4  # conv4_2
         # all layers used for style representation except conv4_2
         self.style_feature_maps_indices = list(range(len(self.layer_names)))
@@ -27,7 +29,7 @@ class Vgg19(nn.Module):
         self.slice4 = torch.nn.Sequential()
         self.slice5 = torch.nn.Sequential()
         self.slice6 = torch.nn.Sequential()
-
+        
         for x in range(1+self.offset):
             self.slice1.add_module(str(x), vgg_pretrained_features[x])
         for x in range(1+self.offset, 6+self.offset):
