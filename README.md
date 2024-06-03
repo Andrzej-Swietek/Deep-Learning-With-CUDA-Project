@@ -5,3 +5,9 @@
     <img src="https://skillicons.dev/icons?i=git,python,pytorch,anaconda" />
   </a>
 </p>
+
+## Authors
+
+- Andrzej Świętek
+- Krzysztof Konieczny
+- Jan Kwiatkowski
