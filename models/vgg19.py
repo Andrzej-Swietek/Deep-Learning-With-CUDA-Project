@@ -17,28 +17,27 @@ class Vgg19(nn.Module):
             self.offset = 0
 
         self.content_feature_maps_index = 4  # conv4_2
-        # all layers used for style representation except conv4_2
         self.style_feature_maps_indices = list(range(len(self.layer_names)))
         self.style_feature_maps_indices.remove(4)  # conv4_2
 
-        self.slice1 = torch.nn.Sequential()
-        self.slice2 = torch.nn.Sequential()
-        self.slice3 = torch.nn.Sequential()
-        self.slice4 = torch.nn.Sequential()
-        self.slice5 = torch.nn.Sequential()
-        self.slice6 = torch.nn.Sequential()
+        self.slice1 = nn.Sequential()
+        self.slice2 = nn.Sequential()
+        self.slice3 = nn.Sequential()
+        self.slice4 = nn.Sequential()
+        self.slice5 = nn.Sequential()
+        self.slice6 = nn.Sequential()
 
-        for x in range(1+self.offset):
+        for x in range(1 + self.offset):
             self.slice1.add_module(str(x), vgg_pretrained_features[x])
-        for x in range(1+self.offset, 6+self.offset):
+        for x in range(1 + self.offset, 6 + self.offset):
             self.slice2.add_module(str(x), vgg_pretrained_features[x])
-        for x in range(6+self.offset, 11+self.offset):
+        for x in range(6 + self.offset, 11 + self.offset):
             self.slice3.add_module(str(x), vgg_pretrained_features[x])
-        for x in range(11+self.offset, 20+self.offset):
+        for x in range(11 + self.offset, 20 + self.offset):
             self.slice4.add_module(str(x), vgg_pretrained_features[x])
-        for x in range(20+self.offset, 22):
+        for x in range(20 + self.offset, 22):
             self.slice5.add_module(str(x), vgg_pretrained_features[x])
-        for x in range(22, 29++self.offset):
+        for x in range(22, 29 + self.offset):
             self.slice6.add_module(str(x), vgg_pretrained_features[x])
         if not requires_grad:
             for param in self.parameters():
