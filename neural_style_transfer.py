@@ -172,7 +172,8 @@ if __name__ == "__main__":
     optimized_image_path = nst.optimize()
 
     # Saving the optimized image to the specified output file
-    output_dir = os.path.dirname(args.output_file)
+    output_dir = os.path.join(config['output_img_dir'], 'output_images')
+
     os.makedirs(output_dir, exist_ok=True)
     os.rename(optimized_image_path, args.output_file)
 
