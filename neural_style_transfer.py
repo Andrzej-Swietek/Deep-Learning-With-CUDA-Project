@@ -133,7 +133,7 @@ if __name__ == "__main__":
     parser.add_argument('--content_image_path', type=str, default='./data/content/star_wars_1.jpg',
                         help='Path to content image')
     parser.add_argument('--style_image_path', type=str, default='./data/style/japan.jpg', help='Path to style image')
-    parser.add_argument('--content_weight', type=float, default=1e4, help='Content loss weight')
+    parser.add_argument('--content_weight', type=float, default=1e5, help='Content loss weight')
     parser.add_argument('--style_weight', type=float, default=3e4, help='Style loss weight')
     parser.add_argument('--tv_weight', type=float, default=1e0, help='Total variation loss weight')
     parser.add_argument('--optimizer', type=str, choices=['lbfgs', 'adam'], default='lbfgs', help='Optimizer choice')
