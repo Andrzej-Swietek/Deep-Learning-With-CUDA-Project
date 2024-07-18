@@ -3,13 +3,15 @@ from kafka import KafkaProducer, KafkaConsumer
 import json
 import os
 import uuid
+import redis
 
 app = Flask(__name__)
 
 
 class Server:
     def __init__(self):
-        self.producer = KafkaProducer(bootstrap_servers='localhost:9092',
+        self.redis_client = redis.Redis(host='redis', port=6379, db=0)
+        self.producer = KafkaProducer(bootstrap_servers='kafka:9092',
                                       value_serializer=lambda v: json.dumps(v).encode('utf-8'))
 
     @app.route('/api/style_transfer', methods=['POST'])
@@ -32,12 +34,17 @@ class Server:
         }
         self.producer.send('style_transfer', task)
 
+        # Save initial task status to Redis
+        self.redis_client.set(task_id, 'Processing')
+
         return jsonify({'task_id': task_id}), 202
 
     @app.route('/api/task_status/<task_id>', methods=['GET'])
     def task_status(self, task_id):
-        # TODO: FETCH STATUS FROM DB
-        return jsonify({'task_id': task_id, 'status': 'Processing'})
+        status = self.redis_client.get(task_id)
+        if status is None:
+            return jsonify({'task_id': task_id, 'status': 'Unknown'}), 404
+        return jsonify({'task_id': task_id, 'status': status.decode('utf-8')})
 
     def run(self, port):
         app.run(host='0.0.0.0', port=port, debug=True)
