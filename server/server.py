@@ -32,7 +32,7 @@ class Server:
             'content_image_path': content_image_path,
             'style_image_path': style_image_path,
         }
-        self.producer.send('style_transfer', task)
+        # self.producer.send('style_transfer', task)
 
         # Save initial task status to Redis
         self.redis_client.set(task_id, 'Processing')
@@ -46,5 +46,10 @@ class Server:
             return jsonify({'task_id': task_id, 'status': 'Unknown'}), 404
         return jsonify({'task_id': task_id, 'status': status.decode('utf-8')})
 
-    def run(self, port):
+    def run(self, port=5000):
         app.run(host='0.0.0.0', port=port, debug=True)
+
+
+if __name__ == '__main__':
+    server_instance = Server()
+    server_instance.run()

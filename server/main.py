@@ -3,7 +3,8 @@ import json
 import os
 import uuid
 
-from server.server import Server
+from server import Server
 
 if __name__ == '__main__':
-    server = Server()
+    server_instance = Server()
+    server_instance.run()

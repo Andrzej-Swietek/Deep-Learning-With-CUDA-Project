@@ -1,5 +1,3 @@
 Flask
 kafka-python
 redis
-torch
-torchvision
