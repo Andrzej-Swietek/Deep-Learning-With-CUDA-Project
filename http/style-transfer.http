@@ -1,0 +1,18 @@
+### Style Transfer Request
+POST http://localhost:5000/api/style_transfer
+Content-Type: multipart/form-data
+
+--boundary
+Content-Disposition: form-data; name="content_image"; filename="content.png"
+Content-Type: image/png
+
+< /home/andrzej/Documents/Deep-Learning-With-CUDA-Project/data/content/vader.png
+--boundary
+Content-Disposition: form-data; name="style_image"; filename="style.jpg"
+Content-Type: image/jpeg
+
+< /home/andrzej/Documents/Deep-Learning-With-CUDA-Project/data/style/klimt.jpg
+--boundary--
+
+### Task Status Request
+GET http://localhost:5000/api/task_status/1234

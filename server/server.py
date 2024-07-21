@@ -5,6 +5,7 @@ import os
 import uuid
 import redis
 
+
 class Server:
     def __init__(self):
         self.app = Flask(__name__)
@@ -22,8 +23,8 @@ class Server:
         task_id = str(uuid.uuid4())
 
         # Save images locally for processing by the consumer
-        content_image_path = f"/tmp/{task_id}_content.jpg"
-        style_image_path = f"/tmp/{task_id}_style.jpg"
+        content_image_path = f"./tmp/{task_id}_content.jpg"
+        style_image_path = f"./tmp/{task_id}_style.jpg"
         content_image.save(content_image_path)
         style_image.save(style_image_path)
 

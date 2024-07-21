@@ -3,6 +3,8 @@ import json
 import os
 import sys
 import signal
+import redis
+import logging
 
 # Get the absolute path of the parent directory
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -12,6 +14,9 @@ from neural_style_transfer import NeuralStyleTransfer
 
 stop_consumer = False
 
+# Setup logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 # Signal handler to gracefully shut down the consumer
 def signal_handler(sig, frame):
@@ -19,6 +24,7 @@ def signal_handler(sig, frame):
     print('\nShutting down gracefully...')
     consumer.close()
     print(f'[LOG]: KAFKA CONSUMER STOPPED')
+    logger.info('KAFKA CONSUMER STOPPED')
     exit(0)
 
 
@@ -32,8 +38,10 @@ consumer = KafkaConsumer(
     # bootstrap_servers='0.0.0.0:9092', # LOCAL
     value_deserializer=lambda m: json.loads(m.decode('utf-8'))
 )
+redis_client = redis.Redis(host='redis', port=6379, db=0)
 
 print(f'[LOG]: KAFKA CONSUMER STARTED')
+logger.info('KAFKA CONSUMER STARTED')
 
 try:
     for message in consumer:
@@ -65,15 +73,17 @@ try:
         }
 
         nst = NeuralStyleTransfer(config)
-        output_path = f"/output/{task_id}"
+        output_path = f"./output/{task_id}"
         os.makedirs(output_path, exist_ok=True)
         result = nst.optimize()
 
         print(f"Task {task_id} completed. Output saved to {output_path}")
+        logger.info(f"Task {task_id} completed. Output saved to {output_path}")
 
-        # You can also update the status of the task in the database here
-        # and notify the frontend when the processing is done.
+        # Update the status of the task in Redis
+        redis_client.set(task_id, 'Finished')
 
 finally:
     consumer.close()
     print(f'[LOG]: KAFKA CONSUMER STOPPED')
+    logger.info('KAFKA CONSUMER STOPPED')
