@@ -5,16 +5,17 @@ import os
 import uuid
 import redis
 
-app = Flask(__name__)
-
-
 class Server:
     def __init__(self):
+        self.app = Flask(__name__)
         self.redis_client = redis.Redis(host='redis', port=6379, db=0)
         self.producer = KafkaProducer(bootstrap_servers='kafka:9092',
                                       value_serializer=lambda v: json.dumps(v).encode('utf-8'))
 
-    @app.route('/api/style_transfer', methods=['POST'])
+        # Register routes
+        self.app.add_url_rule('/api/style_transfer', view_func=self.style_transfer, methods=['POST'])
+        self.app.add_url_rule('/api/task_status/<task_id>', view_func=self.task_status, methods=['GET'])
+
     def style_transfer(self):
         content_image = request.files['content_image']
         style_image = request.files['style_image']
@@ -32,14 +33,13 @@ class Server:
             'content_image_path': content_image_path,
             'style_image_path': style_image_path,
         }
-        # self.producer.send('style_transfer', task)
+        self.producer.send('style_transfer', task)
 
         # Save initial task status to Redis
         self.redis_client.set(task_id, 'Processing')
 
         return jsonify({'task_id': task_id}), 202
 
-    @app.route('/api/task_status/<task_id>', methods=['GET'])
     def task_status(self, task_id):
         status = self.redis_client.get(task_id)
         if status is None:
@@ -47,7 +47,7 @@ class Server:
         return jsonify({'task_id': task_id, 'status': status.decode('utf-8')})
 
     def run(self, port=5000):
-        app.run(host='0.0.0.0', port=port, debug=True)
+        self.app.run(host='0.0.0.0', port=port, debug=True)
 
 
 if __name__ == '__main__':
