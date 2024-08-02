@@ -43,6 +43,11 @@ services:
       KAFKA_LISTENERS: INSIDE://0.0.0.0:29092,OUTSIDE://0.0.0.0:9092
       KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+
+      # Kafka configuration settings
+      KAFKA_MESSAGE_MAX_BYTES: 2097152
+      KAFKA_REPLICA_FETCH_MAX_BYTES: 2097152
+      KAFKA_TOPIC_REPLICATION_FACTOR: 1  # Optional: Adjust as needed
     depends_on:
       - zookeeper
     volumes:

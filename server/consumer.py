@@ -1,3 +1,5 @@
+import base64
+
 from kafka import KafkaConsumer
 import json
 import os
@@ -5,6 +7,10 @@ import sys
 import signal
 import redis
 import logging
+from PIL import Image
+from io import BytesIO
+
+from kafka.errors import KafkaError
 
 # Get the absolute path of the parent directory
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -28,15 +34,23 @@ def signal_handler(sig, frame):
     exit(0)
 
 
+def decode_image(base64_string):
+    # Remove prefix if present
+    if base64_string.startswith('data:image/'):
+        base64_string = base64_string.split(',')[1]
+    image_data = base64.b64decode(base64_string)
+    return Image.open(BytesIO(image_data))
+
 # Register the signal handler
 signal.signal(signal.SIGINT, signal_handler)
 signal.signal(signal.SIGTERM, signal_handler)
 
 consumer = KafkaConsumer(
     'style_transfer',
-    bootstrap_servers='kafka:9092',     # DOCKER
+    bootstrap_servers='kafka:29092',     # DOCKER
     # bootstrap_servers='0.0.0.0:9092', # LOCAL
-    value_deserializer=lambda m: json.loads(m.decode('utf-8'))
+    value_deserializer=lambda m: json.loads(m.decode('utf-8')),
+    max_partition_fetch_bytes=4097152  # Set to a larger value, e.g., 2 MB
 )
 redis_client = redis.Redis(host='redis', port=6379, db=0)
 
@@ -52,6 +66,15 @@ try:
         task_id = task['task_id']
         content_image_path = task['content_image_path']
         style_image_path = task['style_image_path']
+        content_image_base64 = task['content_image']
+        style_image_base64 = task['style_image']
+
+        # Decode the images
+        content_image = decode_image(content_image_base64)
+        style_image = decode_image(style_image_base64)
+
+        content_image.save(content_image_path)
+        style_image.save(style_image_path)
 
         print(f'[LOG]: Task {task_id} | {content_image_path}')
 
@@ -82,6 +105,8 @@ try:
 
         # Update the status of the task in Redis
         redis_client.set(task_id, 'Finished')
+except KafkaError as e:
+    logger.info(f'KAFKA CONSUMER: \n {e} \n\n')
 
 finally:
     consumer.close()
