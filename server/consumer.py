@@ -73,6 +73,12 @@ try:
         content_image = decode_image(content_image_base64)
         style_image = decode_image(style_image_base64)
 
+        # Convert to RGB mode if needed (for pillow)
+        if content_image.mode == 'RGBA':
+            content_image = content_image.convert('RGB')
+        if style_image.mode == 'RGBA':
+            style_image = style_image.convert('RGB')
+
         content_image.save(content_image_path)
         style_image.save(style_image_path)
 
