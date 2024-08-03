@@ -8,6 +8,7 @@ from torch.autograd import Variable
 
 
 class NeuralStyleTransfer:
+
     def __init__(self, config):
         self.config = config
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -81,8 +82,12 @@ class NeuralStyleTransfer:
         content_img_path = os.path.join(self.config['content_images_dir'], self.config['content_img_name'])
         style_img_path = os.path.join(self.config['style_images_dir'], self.config['style_img_name'])
 
-        out_dir_name = 'combined_' + os.path.split(content_img_path)[1].split('.')[0] + '_' + \
-                       os.path.split(style_img_path)[1].split('.')[0]
+        if self.task_ID is None:
+            out_dir_name = 'combined_' + os.path.split(content_img_path)[1].split('.')[0] + '_' + \
+                           os.path.split(style_img_path)[1].split('.')[0]
+        else:
+            out_dir_name = f'{self.task_ID}'
+
         dump_path = os.path.join(self.config['output_img_dir'], out_dir_name)
         os.makedirs(dump_path, exist_ok=True)
 
@@ -130,55 +135,3 @@ class NeuralStyleTransfer:
             optimizer.step(closure)
 
         return dump_path
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Neural Style Transfer')
-    parser.add_argument('--content_image_path', type=str, default='./data/content/star_wars_1.jpg',
-                        help='Path to content image')
-    parser.add_argument('--style_image_path', type=str, default='./data/style/japan.jpg', help='Path to style image')
-    parser.add_argument('--content_weight', type=float, default=1e5, help='Content loss weight')
-    parser.add_argument('--style_weight', type=float, default=3e4, help='Style loss weight')
-    parser.add_argument('--tv_weight', type=float, default=1e0, help='Total variation loss weight')
-    parser.add_argument('--optimizer', type=str, choices=['lbfgs', 'adam'], default='lbfgs', help='Optimizer choice')
-    parser.add_argument('--model', type=str, choices=['vgg16', 'vgg19'], default='vgg19', help='Pre-trained model')
-    parser.add_argument('--init_method', type=str, choices=['random', 'content', 'style'], default='content',
-                        help='Initialization method')
-    parser.add_argument('--total_iterations', type=int, default=20000, help='Total number of optimization iterations')
-    parser.add_argument('--learning_rate', type=float, default=1.0, help='Learning rate for Adam optimizer')
-    parser.add_argument('--height', type=int, default=400, help='Height of the input images')
-    parser.add_argument('--output_file', type=str, default='output_image.jpg', help='Filename for the optimized output image')
-
-    args = parser.parse_args()
-
-    config = {
-        'content_images_dir': '',
-        'content_img_name': os.path.basename(args.content_image_path),
-        'style_images_dir': '',
-        'style_img_name': os.path.basename(args.style_image_path),
-        'output_img_dir': os.path.dirname(args.output_file),
-        'height': args.height,
-        'model': args.model,
-        'init_method': args.init_method,
-        'optimizer': args.optimizer,
-        'content_weight': args.content_weight,
-        'style_weight': args.style_weight,
-        'tv_weight': args.tv_weight,
-        'saving_freq': 100,
-        'img_format': (4, '.jpg')
-    }
-
-    # Setting content and style image directories based on input paths
-    config['content_images_dir'] = os.path.dirname(args.content_image_path)
-    config['style_images_dir'] = os.path.dirname(args.style_image_path)
-
-    nst = NeuralStyleTransfer(config)
-    optimized_image_path = nst.optimize()
-
-    # Saving the optimized image to the specified output file
-    output_dir = os.path.join(config['output_img_dir'], 'output_images')
-
-    os.makedirs(output_dir, exist_ok=True)
-    os.rename(optimized_image_path, args.output_file)
-
-    print(f"Optimized image saved at {args.output_file}")
