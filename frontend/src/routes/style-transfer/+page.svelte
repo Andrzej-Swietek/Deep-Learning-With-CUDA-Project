@@ -135,20 +135,20 @@
 				<p class="max-w-[900px] text-muted-foreground md:text-xl font-bold">Status: {status}</p>
 				{#if status === 'Completed' || status === 'Finished'}
 					<div class="w-full flex flex-row justify-center items-center gap-x-8">
-						<button
-							on:click={() => downloadOneFile()}
-							type="button"
-							class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-32 py-2 mt-16"
-						>
-							Download File
-						</button>
-						<button
-							on:click={() => downloadAllFile()}
-							type="button"
-							class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-32 py-2 mt-16"
-						>
-							Download Zip
-						</button>
+                        <a
+                            target="_blank"
+                            class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-32 py-2 mt-16"
+                            href={`http://localhost:5000/api/download/${taskId}`}
+                        >
+                            Download Zip
+                        </a>
+						<a
+						    target="_blank"
+                            class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-32 py-2 mt-16"
+						    href={`http://localhost:5000/api/download-all/${taskId}`}
+                        >
+						    Download Zip
+                        </a>
 					</div>
 				{/if}
 			</div>
