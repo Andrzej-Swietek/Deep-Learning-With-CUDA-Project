@@ -8,10 +8,15 @@ from torch.autograd import Variable
 
 
 class NeuralStyleTransfer:
+
     def __init__(self, config):
         self.config = config
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.neural_net, self.content_index, self.style_indices = self._prepare_model()
+        self.task_ID = None
+
+    def set_task_ID(self, task_ID):
+        self.task_ID = task_ID
 
     def _prepare_model(self):
         neural_net, content_index, style_indices = utils.prepare_model(self.config['model'], self.device)
@@ -77,8 +82,12 @@ class NeuralStyleTransfer:
         content_img_path = os.path.join(self.config['content_images_dir'], self.config['content_img_name'])
         style_img_path = os.path.join(self.config['style_images_dir'], self.config['style_img_name'])
 
-        out_dir_name = 'combined_' + os.path.split(content_img_path)[1].split('.')[0] + '_' + \
-                       os.path.split(style_img_path)[1].split('.')[0]
+        if self.task_ID is None:
+            out_dir_name = 'combined_' + os.path.split(content_img_path)[1].split('.')[0] + '_' + \
+                           os.path.split(style_img_path)[1].split('.')[0]
+        else:
+            out_dir_name = f'{self.task_ID}'
+
         dump_path = os.path.join(self.config['output_img_dir'], out_dir_name)
         os.makedirs(dump_path, exist_ok=True)
 

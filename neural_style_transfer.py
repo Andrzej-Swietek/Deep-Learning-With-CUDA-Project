@@ -12,6 +12,10 @@ class NeuralStyleTransfer:
         self.config = config
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.neural_net, self.content_index, self.style_indices = self._prepare_model()
+        self.task_ID = None
+
+    def set_task_ID(self, task_ID):
+        self.task_ID = task_ID
 
     def _prepare_model(self):
         neural_net, content_index, style_indices = utils.prepare_model(self.config['model'], self.device)

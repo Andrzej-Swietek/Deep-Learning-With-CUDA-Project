@@ -102,7 +102,9 @@ try:
         }
 
         nst = NeuralStyleTransfer(config)
-        output_path = f"./output/{task_id}"
+        nst.set_task_ID(task_id)
+
+        output_path = f"../output/{task_id}"
         os.makedirs(output_path, exist_ok=True)
         result = nst.optimize()
 
