@@ -1,7 +1,8 @@
 import base64
 import logging
+import shutil
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, make_response, send_file
 from kafka import KafkaProducer
 import json
 import os
@@ -93,11 +94,53 @@ def task_status(task_id):
 @cross_origin()
 def download(task_id):
     task = redis_client.get(task_id)
+    task_status = task.decode('utf-8')
     if task is None:
         return jsonify({'task_id': task_id, 'status': 'Unknown'}), 404
 
-    if task == 'Completed':
-        return jsonify({'task_id': task_id, 'status': 'Finished'}), 202
+    if task_status in ['Finished', 'Completed']:
+        output_path = f"../output/{task_id}/1000.jpg"
+        if os.path.exists(output_path):
+            return send_file_with_attachment(output_path, 'result.jpg')
+        else:
+            return jsonify({
+                'task_id': task_id,
+                'status': 'Output file not found'
+            }), 404
+    else:
+        return jsonify({'task_id': task_id, 'status': f'In Progress: [{task_status}]'}), 404
+
+
+@app.route('/api/download-all/<task_id>', methods=['GET'])
+@cross_origin()
+def download_zip(task_id):
+    task = redis_client.get(task_id)
+    if task is None:
+        return jsonify({'task_id': task_id, 'status': 'Unknown'}), 404
+
+    task_status = task.decode('utf-8')
+    if task_status not in ['Finished', 'Completed']:
+        return jsonify({'task_id': task_id, 'status': f'In Progress: [{task_status}]'}), 202
+
+    # Path to the folder to be zipped
+    folder_path = f"../output/{task_id}"
+    zip_path = f"../output/{task_id}.zip"
+
+    # Create a zip file
+    shutil.make_archive(zip_path[:-4], 'zip', folder_path)
+
+    # Send the zip file
+    try:
+        return send_file_with_attachment(zip_path, f'{task_id}.zip')
+    finally:
+        # Remove the zip file after sending it
+        os.remove(zip_path)
+
+
+def send_file_with_attachment(file_path, filename):
+    response = make_response(send_file(file_path))
+    response.headers["Content-Disposition"] = f"attachment; filename={filename}"
+    return response
 
 
 if __name__ == '__main__':

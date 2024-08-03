@@ -1,7 +1,7 @@
 ```
 +-------------------+      +-------------------+     +------------------------+
 |                   |      |                   |     |                        |
-|     Frontend      |      |      Backend      |     |   Kolejka Zadań        |
+|     Frontend      |      |      Backend      |     |     Tasks Queue        |
 |     (Svelte)      | ---> |   (Flask/FastAPI) | --> |      (Kafka)           |
 |                   |      |                   |     |                        |
 +-------------------+      +-------------------+     +------------------------+
@@ -9,9 +9,9 @@
                                                                 v       |
 +------------------------+     +---------------------+   +--------------------+
 |                        |     |                     |   |                    |
-|  Przechowywanie Plików | <-- |   Baza Danych       |   |  Przetwarzanie     |
-|    (AWS S3 / Local)    |     |  (PostgreSQL/MySQL) |   |  Zadań (Konsumenci)|
-|                        |     |                     |   |    (Kafka)         |
+|      File Storage      | <-- |     Data Base       |   |   Task Consumers   |
+|    (AWS S3 / Local)    |     |  (PostgreSQL/Redis) |   |  (Python + Kafka)  |
+|                        |     |                     |   |        NST         |
 +------------------------+     +---------------------+   +--------------------+
                                                                 |        ^
                                                                 v        |

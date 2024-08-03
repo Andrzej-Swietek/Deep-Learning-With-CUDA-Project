@@ -11,6 +11,7 @@ services:
       - redis
     volumes:
       - ./tmp:/tmp
+      - ./data/output:/output
 
 #  kafka:
 #    image: wurstmeister/kafka:latest
@@ -75,6 +76,7 @@ services:
       - redis
     volumes:
       - ./tmp:/tmp
+      - ./data/output:/output
 #    deploy:
 #      resources:
 #        reservations:
