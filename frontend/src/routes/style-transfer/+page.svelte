@@ -96,6 +96,18 @@
 		}, POLLING_INTERVAL);
 	}
 
+	const downloadOneFile = async () => {
+		const result = await NSTService
+														.getInstance()
+														.downloadResultFile(taskId);
+	}
+
+	const downloadAllFile = async () => {
+		const result = await NSTService
+														.getInstance()
+														.downloadAllFiles(taskId);
+	}
+
 	onMount(()=>{
 		pollingWorker = new PollWorker
 		pollingWorker.onmessage = (event: MessageEvent) => {
@@ -121,6 +133,24 @@
 				<h1 class="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">Neural Style Transfer</h1>
 				<p class="max-w-[900px] text-muted-foreground md:text-xl">Seamlessly blend the content of one image with the style of another, creating stunning and unique artworks.</p>
 				<p class="max-w-[900px] text-muted-foreground md:text-xl font-bold">Status: {status}</p>
+				{#if status === 'Completed' || status === 'Finished'}
+					<div class="w-full flex flex-row justify-center items-center gap-x-8">
+						<button
+							on:click={() => downloadOneFile()}
+							type="button"
+							class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-32 py-2 mt-16"
+						>
+							Download File
+						</button>
+						<button
+							on:click={() => downloadAllFile()}
+							type="button"
+							class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-32 py-2 mt-16"
+						>
+							Download Zip
+						</button>
+					</div>
+				{/if}
 			</div>
 			<div class="grid grid-cols-2 gap-4 w-full max-w-4xl">
 				<div

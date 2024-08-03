@@ -1,5 +1,4 @@
-import { PUBLIC_API_URL } from '$env/static/public'
-
+import {PUBLIC_API_URL} from '$env/static/public'
 import PerformStyleTransferResponse = NSTRequests.PerformStyleTransferResponse;
 import StatusResponse = NSTRequests.StatusResponse;
 
@@ -40,6 +39,32 @@ export class NSTService {
 			const response = await fetch(`${PUBLIC_API_URL}/task_status/${taskId}`);
 			const result = await response.json();
 			return result;
+		} catch (e) {
+			console.log(e);
+			return null;
+		}
+	}
+
+	public async downloadResultFile(taskId: string): Promise<Blob | null> {
+		try {
+			const response = await fetch(`${PUBLIC_API_URL}/download/${taskId}`);
+			if (!response.ok)
+				throw new Error('Network response was not ok');
+
+			return await response.blob();
+		} catch (e) {
+			console.log(e);
+			return null;
+		}
+	}
+
+	public async downloadAllFiles(taskId: string): Promise<Blob | null> {
+		try {
+			const response = await fetch(`${PUBLIC_API_URL}/download-all/${taskId}`);
+			if (!response.ok)
+				throw new Error('Network response was not ok');
+
+			return await response.blob();
 		} catch (e) {
 			console.log(e);
 			return null;
