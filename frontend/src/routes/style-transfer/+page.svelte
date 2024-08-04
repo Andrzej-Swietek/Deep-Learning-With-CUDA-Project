@@ -4,6 +4,7 @@
 	import { NSTService } from '@services/NST.service';
 	import type { NSTRequests } from '@services/NST.service';
 	import PerformStyleTransferResponse = NSTRequests.PerformStyleTransferResponse;
+	import {PUBLIC_API_URL} from '$env/static/public'
 
   const POLLING_INTERVAL = 5000; // in ms
 
@@ -138,14 +139,14 @@
                         <a
                             target="_blank"
                             class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-32 py-2 mt-16"
-                            href={`http://localhost:5000/api/download/${taskId}`}
+                            href={`${PUBLIC_API_URL}/download/${taskId}`}
                         >
                             Download Zip
                         </a>
 						<a
 						    target="_blank"
                             class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-32 py-2 mt-16"
-						    href={`http://localhost:5000/api/download-all/${taskId}`}
+						    href={`${PUBLIC_API_URL}/download-all/${taskId}`}
                         >
 						    Download Zip
                         </a>
