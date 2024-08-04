@@ -1,0 +1,16 @@
+# NVIDIA's PyTorch image as the base image
+# FROM nvcr.io/nvidia/pytorch:22.06-py3
+FROM python:3.9-slim
+
+RUN apt-get update && apt-get install -y \
+    libgl1-mesa-glx \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY requirements.consumer.txt requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+CMD ["python", "consumer.py"]
