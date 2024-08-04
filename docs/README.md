@@ -41,11 +41,12 @@ docker-compose up --build -d
 
 ## Usage Manual
 ### Web Service
-![image](https://github.com/Andrzej-Swietek/Deep-Learning-With-CUDA-Project/blob/dev/docs/image1.png?raw=true)
+![image](https://github.com/Andrzej-Swietek/Deep-Learning-With-CUDA-Project/blob/dev/docs/images/image1.png?raw=true)
+
 1. Open browser @ `http://localhost:5173/`
 2. Press `Start` button in navbar section
 
-![image](https://github.com/Andrzej-Swietek/Deep-Learning-With-CUDA-Project/blob/dev/docs/image2.png?raw=true)
+![image](https://github.com/Andrzej-Swietek/Deep-Learning-With-CUDA-Project/blob/dev/docs/images/image2.png?raw=true)
 
 3. Either drag and Drop file from your computer or press button `Choose File`
 
