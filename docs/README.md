@@ -253,6 +253,76 @@ def _prepare_init_image(self, content_img, style_img):
 ```
 
 6. **Optimization**
-7. **Execution**
-8. **Summary**
+
+   6.1.  Initialization of the Optimization Process
+
+   - Content and Style Image Paths: The paths to the content and style images are set up using the configuration dictionary.
+
+   ```python
+   content_img_path = os.path.join(self.config['content_images_dir'], self.config['content_img_name'])
+   style_img_path = os.path.join(self.config['style_images_dir'], self.config['style_img_name'])
+   ```
+   - Output Directory Setup: A directory for saving the output images is created.
+   ```python
+   out_dir_name = 'combined_' + os.path.split(content_img_path)[1].split('.')[0] + '_' + os.path.split(style_img_path)[1].split('.')[0]
+   dump_path = os.path.join(self.config['output_img_dir'], out_dir_name)
+   os.makedirs(dump_path, exist_ok=True)
+   ```
+   - Image Preparation: The content and style images are loaded and preprocessed.
+   ```python
+   content_img = utils.prepare_img(content_img_path, self.config['height'], self.device)
+   style_img = utils.prepare_img(style_img_path, self.config['height'], self.device)
+   ```
+   - Initial Image: The initial image to start the optimization is prepared based on the specified initialization method (random, content, or style).
+   ```python
+   optimizing_img = self._prepare_init_image(content_img, style_img)
+   ```
+   - Target Representations: The target content and style representations are computed from the content and style images using the neural network.
+   ```python
+   target_representations = self._prepare_target_representations(content_img, style_img)
+   ``` 
+
+
+  6.2. Adam Optimizer
+   - Optimizer Setup: The Adam optimizer is initialized with a high learning rate.
+   - Tuning Step Function: The make_tuning_step function creates a closure that computes the loss, performs a backward pass, and updates the image.
+   ```python
+   tuning_step = self.make_tuning_step(optimizer, target_representations)
+   ```
+   - Optimization Loop: The Adam optimizer iteratively updates the image over a specified number of iterations. During each iteration, the total loss, content loss, style loss, and TV loss are computed and printed.
+
+   ```python
+   for cnt in range(num_of_iterations[self.config['optimizer']]):
+       total_loss, content_loss, style_loss, tv_loss = tuning_step(optimizing_img)
+       with torch.no_grad():
+           print(f'Adam | iteration: {cnt:03}, total loss={total_loss.item():12.4f}, content_loss={self.config["content_weight"] * content_loss.item():12.4f}, style loss={self.config["style_weight"] * style_loss.item():12.4f}, tv loss={self.config["tv_weight"] * tv_loss.item():12.4f}')
+           utils.save_and_maybe_display(optimizing_img, dump_path, self.config, cnt, num_of_iterations[self.config['optimizer']], should_display=False)
+   
+   ```
+
+  6.3. L-BFGS Optimizer
+
+  - Optimizer Setup: The L-BFGS optimizer is initialized with a strong Wolfe line search.
+  - Closure Function: A closure function is defined that computes the total loss, performs a backward pass, and updates the image. This function is called by the optimizer to perform each optimization step.
+   ```python
+   def closure():
+       nonlocal cnt
+       if torch.is_grad_enabled():
+           optimizer.zero_grad()
+       total_loss, content_loss, style_loss, tv_loss = self.build_loss(optimizing_img, target_representations)
+       if total_loss.requires_grad:
+           total_loss.backward()
+       with torch.no_grad():
+           print(f'L-BFGS | iteration: {cnt:03}, total loss={total_loss.item():12.4f}, content_loss={self.config["content_weight"] * content_loss.item():12.4f}, style loss={self.config["style_weight"] * style_loss.item():12.4f}, tv loss={self.config["tv_weight"] * tv_loss.item():12.4f}')
+           utils.save_and_maybe_display(optimizing_img, dump_path, self.config, cnt, num_of_iterations[self.config['optimizer']], should_display=False)
+   
+       cnt += 1
+       return total_loss
+   ```
+   - Optimization Step: 
+
+      The L-BFGS optimizer performs the optimization by calling the closure function repeatedly until the maximum number of iterations is reached.
+
+7. **Summary**
+
    The neural style transfer process works by optimizing an initial image to minimize a combination of content loss, style loss, and total variation loss. The content loss ensures that the generated image retains the content of the original content image, while the style loss ensures that it captures the style of the style image. The total variation loss helps in smoothing the generated image. By iteratively updating the image based on the computed losses, the algorithm produces an image that combines the content and style in a visually appealing manner.
