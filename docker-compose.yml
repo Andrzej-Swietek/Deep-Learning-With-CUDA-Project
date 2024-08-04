@@ -13,24 +13,7 @@ services:
       - ./tmp:/tmp
       - ./data/output:/output
 
-#  kafka:
-#    image: wurstmeister/kafka:latest
-#    container_name: kafka
-#    ports:
-#      - "9092:9092"
-#    environment:
-#      KAFKA_BROKER_ID: 1
-#      KAFKA_ADVERTISED_HOST_NAME: localhost
-#      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka:9092,OUTSIDE://localhost:9092
-#      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
-#      KAFKA_LISTENERS: INSIDE://0.0.0.0:9092,OUTSIDE://0.0.0.0:29092
-#      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
-#      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-#
-#    depends_on:
-#      - zookeeper
-#    volumes:
-#      - /var/run/docker.sock:/var/run/docker.sock
+
   kafka:
     image: wurstmeister/kafka:latest
     container_name: kafka
@@ -85,3 +68,14 @@ services:
 #              count: 1
 #              capabilities: [gpu]
 #    runtime: nvidia
+
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: sveltekit_frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - app
