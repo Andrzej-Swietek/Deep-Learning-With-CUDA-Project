@@ -16,3 +16,11 @@ Content-Type: image/jpeg
 
 ### Task Status Request
 GET http://localhost:5000/api/task_status/1234
+
+
+### Download result file
+GET http://localhost:5000/api/dowload/1234
+
+
+### Download all results as ZIP
+GET http://localhost:5000/api/dowload-all/1234
