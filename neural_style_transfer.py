@@ -92,23 +92,24 @@ class NeuralStyleTransfer:
         optimizing_img = self._prepare_init_image(content_img, style_img)
         target_representations = self._prepare_target_representations(content_img, style_img)
 
-        num_of_iterations = {
+        # Determine the number of iterations
+        num_of_iterations = self.config['total_iterations'] if self.config['total_iterations'] else {
             "lbfgs": 1000,
             "adam": 3000,
-        }
+        }[self.config['optimizer']]
 
         if self.config['optimizer'] == 'adam':
-            optimizer = Adam((optimizing_img,), lr=1e1)
+            optimizer = Adam((optimizing_img,), lr=self.config['learning_rate'])
             tuning_step = self.make_tuning_step(optimizer, target_representations)
-            for cnt in range(num_of_iterations[self.config['optimizer']]):
+            for cnt in range(num_of_iterations):
                 total_loss, content_loss, style_loss, tv_loss = tuning_step(optimizing_img)
                 with torch.no_grad():
                     print(
                         f'Adam | iteration: {cnt:03}, total loss={total_loss.item():12.4f}, content_loss={self.config["content_weight"] * content_loss.item():12.4f}, style loss={self.config["style_weight"] * style_loss.item():12.4f}, tv loss={self.config["tv_weight"] * tv_loss.item():12.4f}')
                     utils.save_and_maybe_display(optimizing_img, dump_path, self.config, cnt,
-                                                 num_of_iterations[self.config['optimizer']], should_display=False)
+                                                 num_of_iterations, should_display=False)
         elif self.config['optimizer'] == 'lbfgs':
-            optimizer = LBFGS((optimizing_img,), max_iter=num_of_iterations['lbfgs'], line_search_fn='strong_wolfe')
+            optimizer = LBFGS((optimizing_img,), max_iter=num_of_iterations, line_search_fn='strong_wolfe')
             cnt = 0
 
             def closure():
@@ -122,7 +123,7 @@ class NeuralStyleTransfer:
                     print(
                         f'L-BFGS | iteration: {cnt:03}, total loss={total_loss.item():12.4f}, content_loss={self.config["content_weight"] * content_loss.item():12.4f}, style loss={self.config["style_weight"] * style_loss.item():12.4f}, tv loss={self.config["tv_weight"] * tv_loss.item():12.4f}')
                     utils.save_and_maybe_display(optimizing_img, dump_path, self.config, cnt,
-                                                 num_of_iterations[self.config['optimizer']], should_display=False)
+                                                 num_of_iterations, should_display=False)
 
                 cnt += 1
                 return total_loss
@@ -144,7 +145,7 @@ if __name__ == "__main__":
     parser.add_argument('--model', type=str, choices=['vgg16', 'vgg19'], default='vgg19', help='Pre-trained model')
     parser.add_argument('--init_method', type=str, choices=['random', 'content', 'style'], default='content',
                         help='Initialization method')
-    parser.add_argument('--total_iterations', type=int, default=20000, help='Total number of optimization iterations')
+    parser.add_argument('--total_iterations', type=int, default=None, help='Total number of optimization iterations')
     parser.add_argument('--learning_rate', type=float, default=1.0, help='Learning rate for Adam optimizer')
     parser.add_argument('--height', type=int, default=400, help='Height of the input images')
     parser.add_argument('--output_file', type=str, default='output_image.jpg', help='Filename for the optimized output image')
@@ -165,7 +166,8 @@ if __name__ == "__main__":
         'style_weight': args.style_weight,
         'tv_weight': args.tv_weight,
         'saving_freq': 100,
-        'img_format': (4, '.jpg')
+        'img_format': (4, '.jpg'),
+        'total_iterations': args.total_iterations,  # Add this line to use the provided total iterations
     }
 
     # Setting content and style image directories based on input paths
@@ -179,6 +181,6 @@ if __name__ == "__main__":
     output_dir = os.path.join(config['output_img_dir'], 'output_images')
 
     os.makedirs(output_dir, exist_ok=True)
-    os.rename(optimized_image_path, args.output_file)
+    # os.rename(optimized_image_path, args.output_file)
 
     print(f"Optimized image saved at {args.output_file}")
