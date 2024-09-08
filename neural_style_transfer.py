@@ -92,14 +92,14 @@ class NeuralStyleTransfer:
 
         return tuning_step
 
-    def _prepare_init_image(self, content_img: torch.Tensor, style_img: torch.Tensor) -> Variable:
+    def _prepare_init_image(self, content_img: torch.Tensor, style_img: torch.Tensor, style_img_path: str) -> Variable:
         if self.config.init_method == 'random':
             gaussian_noise_img = np.random.normal(loc=0, scale=90., size=content_img.shape).astype(np.float32)
             init_img = torch.from_numpy(gaussian_noise_img).float().to(self.device)
         elif self.config.init_method == 'content':
             init_img = content_img
         else:
-            style_img_resized = utils.prepare_img(style_img, np.asarray(content_img.shape[2:]), self.device)
+            style_img_resized = utils.prepare_img(style_img_path, np.asarray(content_img.shape[2:]), self.device)
             init_img = style_img_resized
 
         return Variable(init_img, requires_grad=True)
@@ -118,15 +118,15 @@ class NeuralStyleTransfer:
         content_img_path = os.path.join(self.config.content_images_dir, self.config.content_img_name)
         style_img_path = os.path.join(self.config.style_images_dir, self.config.style_img_name)
 
-        out_dir_name = 'combined_' + os.path.split(content_img_path)[1].split('.')[0] + '_' + \
-                       os.path.split(style_img_path)[1].split('.')[0]
-        dump_path = os.path.join(self.config.output_img_dir, out_dir_name)
+        # out_dir_name = 'combined_' + os.path.split(content_img_path)[1].split('.')[0] + '_' + \
+        #                os.path.split(style_img_path)[1].split('.')[0]
+        dump_path = self.config.output_img_dir
         os.makedirs(dump_path, exist_ok=True)
 
         content_img = utils.prepare_img(content_img_path, self.config.height, self.device)
         style_img = utils.prepare_img(style_img_path, self.config.height, self.device)
 
-        optimizing_img = self._prepare_init_image(content_img, style_img)
+        optimizing_img = self._prepare_init_image(content_img, style_img, style_img_path)
         target_representations = self._prepare_target_representations(content_img, style_img)
 
         num_of_iterations = self.config.total_iterations if self.config.total_iterations else {
@@ -184,17 +184,17 @@ if __name__ == "__main__":
     parser.add_argument('--total-iterations', type=int, default=100, help='Total number of optimization iterations')
     parser.add_argument('--learning-rate', type=float, default=1, help='Learning rate for Adam optimizer')
     parser.add_argument('--height', type=int, default=400, help='Height of the input images')
-    parser.add_argument('--output-folder', type=str, default='output_image', help='Filename for the optimized output image')
+    parser.add_argument('--output-folder', type=str, default='./output_images', help='Output folder for the optimized image')
+    parser.add_argument('--saving-interval', type=int, default=100, help='Iteration interval between saving images')
 
     args = parser.parse_args()
-
 
     config = Config(
         content_images_dir=os.path.dirname(args.content_image_path),
         content_img_name=os.path.basename(args.content_image_path),
         style_images_dir=os.path.dirname(args.style_image_path),
         style_img_name=os.path.basename(args.style_image_path),
-        output_img_dir=os.path.dirname(args.output_folder),
+        output_img_dir=args.output_folder,  # Corrected this line
         height=args.height,
         model=args.model,
         init_method=args.init_method,
@@ -202,10 +202,10 @@ if __name__ == "__main__":
         content_weight=args.content_weight,
         style_weight=args.style_weight,
         tv_weight=args.tv_weight,
-        saving_freq=100,
+        saving_freq=args.saving_interval,
         img_format=(4, '.jpg'),
         total_iterations=args.total_iterations,
-        learning_rate=args.learning_rate
+        learning_rate=args.learning_rate,
     )
 
     nst = NeuralStyleTransfer(config)
