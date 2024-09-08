@@ -9,6 +9,8 @@ import torch
 from torch import Tensor
 from torchvision import transforms
 
+from models.vgg11 import Vgg11
+from models.vgg13 import Vgg13
 from models.vgg16 import Vgg16
 from models.vgg19 import Vgg19
 from neural_style_transfer import Config
@@ -102,6 +104,10 @@ def prepare_model(model, device) -> Tuple[torch.nn.Module, Tuple[int, str], Tupl
         model = Vgg19(requires_grad=False, show_progress=True)
     elif model == 'vgg16':
         model = Vgg16(requires_grad=False, show_progress=True)
+    elif model == 'vgg13':
+        model = Vgg13(requires_grad=False, show_progress=True)
+    elif model == 'vgg11':
+        model = Vgg11(requires_grad=False, show_progress=True)
     else:
         raise ValueError(f'{model} not supported.')
 
